@@ -1,21 +1,26 @@
 import { useState } from "react";
 import "./App.css";
+import Sidebar from "./components/Sidebar";
 import SearchBar from "./components/SearchBar";
 import GetWeather from "./components/GetWeather";
 
 function App() {
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState("Seattle");
+  const [isMetric, setIsMetric] = useState(false);
 
   return (
-    <div className="content">
-      <div className="left-container">
-        <h1>Weather Forecast</h1>
-      </div>
+    <div className="app">
+      <Sidebar />
 
-      <div className="right-container">
-        <SearchBar search={setCity} />
-        {city && <GetWeather input={city} />}
-      </div>
+      <main className="main-content">
+        <SearchBar
+          search={setCity}
+          isMetric={isMetric}
+          onToggleUnits={() => setIsMetric((prev) => !prev)}
+        />
+
+        {city && <GetWeather input={city} isMetric={isMetric} />}
+      </main>
     </div>
   );
 }

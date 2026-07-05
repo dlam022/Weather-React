@@ -20,69 +20,83 @@ function formatLocalDateTime(localtime) {
   return { date, time };
 }
 
-function WeatherDisplay({ data }) {
+function WeatherDisplay({ data, isMetric }) {
   const { date, time } = formatLocalDateTime(data.location.localtime);
+  const tempUnit = isMetric ? "C" : "F";
+  const temp = isMetric ? data.current.temp_c : data.current.temp_f;
+  const feelsLike = isMetric ? data.current.feelslike_c : data.current.feelslike_f;
+  const wind = isMetric ? data.current.wind_kph : data.current.wind_mph;
+  const windUnit = isMetric ? "kph" : "mph";
+  const visibility = isMetric ? data.current.vis_km : data.current.vis_miles;
+  const visibilityUnit = isMetric ? "km" : "mi";
+  const pressure = isMetric ? data.current.pressure_mb : data.current.pressure_in;
+  const pressureUnit = isMetric ? "mb" : "inHg";
+
+  const stats = [
+    {
+      label: "Humidity",
+      value: `${data.current.humidity}%`,
+      icon: "https://cdn.meteocons.com/3.0.0-next.10/svg/line/humidity.svg",
+    },
+    {
+      label: "Wind",
+      value: `${data.current.wind_dir} ${wind} ${windUnit}`,
+      icon: "https://cdn.meteocons.com/3.0.0-next.10/svg/fill/wind.svg",
+    },
+    {
+      label: "Pressure",
+      value: `${pressure} ${pressureUnit}`,
+      icon: "https://cdn.meteocons.com/3.0.0-next.10/svg/line/barometer.svg",
+    },
+    {
+      label: "Visibility",
+      value: `${visibility} ${visibilityUnit}`,
+      icon: visibilityIcon,
+    },
+  ];
 
   return (
-    <>
-      <h3>{data.location.name}</h3>
-      <div className="date-time">
-        <p>{date}</p>
-        <p>{time}</p>
-      </div>
-      <div className="logo-temp">
-        <div className="logo-left">
-          <img
-            className="weather-icon"
-            src={GetWeatherIcons(data.current.condition.code)}
-            alt={data.current.condition.text}
-          />
+    <article className="weather-dashboard">
+      <header className="dashboard-header">
+        <div>
+          <h2 className="dashboard-city">
+            {data.location.name}, {data.location.region}
+          </h2>
+          <p className="dashboard-datetime">
+            {date} • {time}
+          </p>
         </div>
-        <div className="info-right">
-            <h1 className="temperature">{data.current.temp_f}</h1>
-            <h3>{data.current.condition.text}</h3>
-            <p>Feels like {data.current.feelslike_f}</p>
-        </div>
-      </div>
+      </header>
 
-      <div className="current-information">
-        <div className="condition-container">
-            <img src="https://cdn.meteocons.com/3.0.0-next.10/svg/line/humidity.svg"
-            alt="Humidity logo"
-            width="64"
-            height="64"
-            />
-            <div className="grid-container">
-                <p>Humidity</p>
-                <p>{data.current.humidity}%</p>  
-            </div>
-        </div>
-
-        <div className="condition-container">
-            <img src="https://cdn.meteocons.com/3.0.0-next.10/svg/fill/wind.svg" alt="Wind logo" width="64" height="64"/>
-            <div className="grid-container">
-                <p>Wind</p>
-                <p>{data.current.wind_mph}</p> 
-            </div>
-        </div>
-
-        <div className="condition-container">
-            <img src="https://cdn.meteocons.com/3.0.0-next.10/svg/line/barometer.svg" alt="Pressure Logo" width="64" height="64"/>
-            <div className="grid-container">
-                <p>Pressure</p>
-                <p>{data.current.pressure_in}</p>
-            </div>
-        </div>
-
-        <div className="condition-container">
-            <img src={visibilityIcon} alt="Visibility Logo" width="64" height="64" />
-            <div className="grid-container">
-                <p>Visibility</p>
-                <p>{data.current.vis_miles}</p>
-            </div>
+      <div className="dashboard-main">
+        <img
+          className="weather-icon"
+          src={GetWeatherIcons(data.current.condition.code)}
+          alt={data.current.condition.text}
+        />
+        <div className="dashboard-temp-block">
+          <p className="temperature">
+            {Math.round(temp)}°{tempUnit}
+          </p>
+          <p className="condition-text">{data.current.condition.text}</p>
+          <p className="feels-like">
+            Feels like {Math.round(feelsLike)}°{tempUnit}
+          </p>
         </div>
       </div>
-    </>
+
+      <div className="stats-row">
+        {stats.map((stat) => (
+          <div className="stat-card" key={stat.label}>
+            <img className="stat-icon" src={stat.icon} />
+            <div>
+              <p className="stat-label">{stat.label}</p>
+              <p className="stat-value">{stat.value}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </article>
   );
 }
 

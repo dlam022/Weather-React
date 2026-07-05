@@ -1,8 +1,10 @@
 function LoadingScreen() {
-    console.log("run loading screen");
-    return(
-        <h1>Loading Screen</h1>
-    )
+  return (
+    <div className="loading-card">
+      <div className="loading-spinner" />
+      <p>Fetching weather data...</p>
+    </div>
+  );
 }
 
 export default LoadingScreen;

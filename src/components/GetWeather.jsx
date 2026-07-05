@@ -1,38 +1,66 @@
 import { useEffect, useState } from "react";
 import WeatherDisplay from "./WeatherDisplay";
 import LoadingScreen from "./LoadingScreen";
-import ForecastDisplay from "./ForecastDisplay";
 
+const API_KEY = "6d40e541c47149bfb8b225446240805";
 
-function GetWeather({ input }) {
-    const [weatherData, setWeatherData] = useState(null);
-    const [loading, setLoading] = useState(false);
+function GetWeather({ input, isMetric }) {
+  const [weatherData, setWeatherData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    useEffect (() => {
-        async function weatherapi() {
-            setLoading(true);
-            setWeatherData(null);
-            let url = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=6d40e541c47149bfb8b225446240805&q=${input}&days=3&aqi=no&alerts=no`)
-            
-            const data = await url.json();
-            console.log(data);
+  useEffect(() => {
+    async function fetchWeather() {
+      setLoading(true);
+      setWeatherData(null);
+      setError(null);
 
-            setWeatherData(data);
-            setLoading(false);
+      try {
+        const response = await fetch(
+          `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${input}&aqi=no`
+        );
+        const data = await response.json();
 
-        } 
-        weatherapi();
-    }, [input]);
+        if (!response.ok) {
+          throw new Error(data.error?.message ?? "Could not load weather");
+        }
 
-    if(loading) return <LoadingScreen />
-    return weatherData ? (
-        <div className="display-container">
-            <WeatherDisplay data={weatherData} />
-            <ForecastDisplay forecast={weatherData.forecast.forecastday} />
-        </div>
-    ) : null;
- 
-    
+        setWeatherData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (input) {
+      fetchWeather();
+    }
+  }, [input]);
+
+  if (loading) {
+    return (
+      <div className="display-container">
+        <LoadingScreen />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="display-container">
+        <div className="error-card">{error}</div>
+      </div>
+    );
+  }
+
+  if (!weatherData) return null;
+
+  return (
+    <div className="display-container">
+      <WeatherDisplay data={weatherData} isMetric={isMetric} />
+    </div>
+  );
 }
 
 export default GetWeather;
